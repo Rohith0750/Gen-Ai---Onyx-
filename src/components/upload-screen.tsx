@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, ChangeEvent } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { UploadCloud, Loader2, FileText, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +14,6 @@ type UploadScreenProps = {
 
 export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
   const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +37,15 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
-      onAnalyze(text);
+      if (text) {
+        onAnalyze(text);
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'File Empty',
+          description: 'The selected file is empty or could not be read.',
+        });
+      }
     };
     reader.onerror = () => {
         toast({
@@ -87,35 +94,36 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div 
-            className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 mb-4 transition-colors hover:border-primary/50 hover:bg-accent"
-            onClick={() => fileInputRef.current?.click()}
+          <label 
+            htmlFor="file-upload"
+            className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 mb-4 block cursor-pointer transition-colors hover:border-primary/50 hover:bg-accent"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
             <input
+              id="file-upload"
               type="file"
-              ref={fileInputRef}
               onChange={handleFileChange}
               className="hidden"
               disabled={isLoading}
+              accept="text/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             />
             {file ? (
               <div className="flex items-center justify-center text-sm font-medium">
                 <FileText className="mr-2 h-5 w-5 text-primary" />
                 <span>{file.name}</span>
-                <Button variant="ghost" size="icon" className="ml-2 h-6 w-6" onClick={(e) => { e.stopPropagation(); setFile(null); }}>
+                <Button variant="ghost" size="icon" className="ml-2 h-6 w-6" onClick={(e) => { e.stopPropagation(); e.preventDefault(); setFile(null); }}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             ) : (
-              <p className="text-muted-foreground">Drag & Drop or Click to Upload any file</p>
+              <p className="text-muted-foreground">Drag & Drop or Click to Upload a file</p>
             )}
-          </div>
+          </label>
           
           <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <Button size="lg" onClick={handleAnalyze} disabled={isLoading || !file}>
-              {isLoading ? (
+              {isLoading && file ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Analyzing...
@@ -125,7 +133,14 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
               )}
             </Button>
             <Button size="lg" variant="outline" onClick={handleAnalyzeSample} disabled={isLoading}>
-              Use Sample Document
+               {isLoading && !file ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                'Use Sample Document'
+              )}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
