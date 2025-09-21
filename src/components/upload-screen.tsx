@@ -20,13 +20,13 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type === 'text/plain' && selectedFile.size <= 5 * 1024 * 1024) {
+      if (selectedFile.size <= 5 * 1024 * 1024) {
         setFile(selectedFile);
       } else {
         toast({
           variant: 'destructive',
-          title: 'Invalid File',
-          description: 'Please upload a plain text (.txt) file under 5MB.',
+          title: 'File Too Large',
+          description: 'Please upload a file under 5MB.',
         });
       }
     }
@@ -62,13 +62,13 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files?.[0];
      if (droppedFile) {
-      if (droppedFile.type === 'text/plain' && droppedFile.size <= 5 * 1024 * 1024) {
+      if (droppedFile.size <= 5 * 1024 * 1024) {
         setFile(droppedFile);
       } else {
         toast({
           variant: 'destructive',
-          title: 'Invalid File',
-          description: 'Please upload a plain text (.txt) file under 5MB.',
+          title: 'File Too Large',
+          description: 'Please upload a file under 5MB.',
         });
       }
     }
@@ -83,7 +83,7 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
           </div>
           <CardTitle className="mt-4 text-2xl font-headline">Analyze Your Legal Document</CardTitle>
           <CardDescription>
-            Upload a .txt file to get a simplified summary, key section highlights, and answers to your questions.
+            Upload a text-based file to get a simplified summary, key section highlights, and answers to your questions.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -98,7 +98,6 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
               ref={fileInputRef}
               onChange={handleFileChange}
               className="hidden"
-              accept=".txt"
               disabled={isLoading}
             />
             {file ? (
@@ -110,7 +109,7 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
                 </Button>
               </div>
             ) : (
-              <p className="text-muted-foreground">Drag & Drop or Click to Upload (.txt file)</p>
+              <p className="text-muted-foreground">Drag & Drop or Click to Upload any file</p>
             )}
           </div>
           
@@ -130,7 +129,7 @@ export function UploadScreen({ onAnalyze, isLoading }: UploadScreenProps) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            Max file size: 5MB. Only .txt files are supported.
+            Max file size: 5MB.
           </p>
         </CardContent>
       </Card>
