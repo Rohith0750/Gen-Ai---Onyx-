@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import type { SummarizeLegalDocumentOutput } from '@/ai/flows/summarize-legal-document';
 import { analyzeDocumentAction } from '@/app/actions';
-import { mockDocumentText } from '@/lib/mock-document';
 import { Header } from '@/components/header';
 import { UploadScreen } from '@/components/upload-screen';
 import { MainDisplay } from '@/components/main-display';
@@ -20,13 +19,15 @@ export default function Home() {
   const [summary, setSummary] = useState<SummarizeLegalDocumentOutput | null>(null);
   const [highlightedText, setHighlightedText] = useState<string>('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [originalDocument, setOriginalDocument] = useState<string>('');
 
   const { toast } = useToast();
 
-  const handleAnalyzeDocument = async () => {
+  const handleAnalyzeDocument = async (documentText: string) => {
     setAppState('loading');
     setChatHistory([]); // Reset chat history on new analysis
-    const result = await analyzeDocumentAction(mockDocumentText);
+    setOriginalDocument(documentText);
+    const result = await analyzeDocumentAction(documentText);
 
     if (result.success) {
       setSummary(result.summary);
@@ -48,15 +49,23 @@ export default function Home() {
     }
   };
 
+  const handleReset = () => {
+    setAppState('unloaded');
+    setSummary(null);
+    setHighlightedText('');
+    setChatHistory([]);
+    setOriginalDocument('');
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header />
+      <Header onNewDocument={appState === 'loaded' ? handleReset : undefined} />
       <main className="flex-grow container mx-auto p-4 md:p-8">
         {appState !== 'loaded' ? (
           <UploadScreen onAnalyze={handleAnalyzeDocument} isLoading={appState === 'loading'} />
         ) : summary && highlightedText ? (
           <MainDisplay
-            documentText={mockDocumentText}
+            documentText={originalDocument}
             summary={summary}
             highlightedText={highlightedText}
             chatHistory={chatHistory}
